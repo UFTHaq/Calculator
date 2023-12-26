@@ -1,5 +1,7 @@
 ﻿// Calculator.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// Author : UFTHaq
+// Created: 24-12-2023
+// Purpose: Simple calculator application using Raylib.
 
 #pragma execution_character_set("utf-8")
 
@@ -26,6 +28,9 @@
 //#define FONT_BUTTON_PATH {"Fonts/Ubuntu/Ubuntu-Medium.ttf"}
 //"D:\Coding\Raylib C++\Calculator\Fonts\Ubuntu\Ubuntu-Medium.ttf"
 #define FONT_BUTTON_SIZE 200
+//#define FONT_CALCULATOR_PATH {"Fonts/Roboto_Mono/static/RobotoMono-Medium.ttf"}
+#define FONT_CALCULATOR_PATH {"Fonts/technology/Technology-Bold.ttf"}
+#define FONT_CALCULATOR_SIZE 400
 
 #define ICON {"Icons/calculator.png"}
 #define TITLE {"CALCULATOR"}
@@ -33,12 +38,13 @@
 
 #define CALC_WIDTH 490
 #define CALC_HEIGHT 690
-#define MAIN_SCR_CLR CLITERAL(Color) { 200, 220, 130, 0xFF }
+#define MAIN_SCR_ON CLITERAL(Color)  { 180, 200, 140, 0xFF }
+#define MAIN_SCR_OFF CLITERAL(Color) { 100, 100, 100, 0xFF }
 #define MAIN_SCR_BRD CLITERAL(Color) {  20,  20,  20,  100 }
 
-#define CAL_BLK CLITERAL(Color) { 5,   5,  5, 255 }
-#define CAL_GRA CLITERAL(Color) { 120, 110, 100, 255 }
-#define CAL_ORA CLITERAL(Color) { 170,  50,   5, 255 }
+#define CAL_BLK CLITERAL(Color)		 {   5,   5,   5, 255 }
+#define CAL_GRA CLITERAL(Color)		 { 120, 110, 100, 255 }
+#define CAL_ORA CLITERAL(Color)		 { 170,  50,   5, 255 }
 Color CAL_COL_FONT = LIGHTGRAY;
 Color ColorHover = SKYBLUE;
 
@@ -59,9 +65,10 @@ CasioScr SecondScrSet{ 145, 37, 40 };
 CasioScr MainScrSet{ 45, 100, 100 };
 
 Rectangle CasioBaseFrame();
+void DrawCalculator(const Font& FontMainStyle);
+void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputExpression, Color& MainScreenColor, bool& startUp);
 void DayNight(int& time_hours, const Texture2D& DayNightTexture);
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture);
-void DrawCalculator(const Font& FontMainStyle);
 Rectangle CasioFrontFrame();
 Vector2 CasioTitlePos();
 Vector2 CasioSeriesPos();
@@ -75,9 +82,9 @@ void Battery(int& time_hours);
 Rectangle MainScr();
 Rectangle MainScrBorder();
 
-void DrawAllButtons(Font& FontButtonStyle);
+void DrawAllButtons(Font& FontButtonStyle, std::string& inputExpression);
 
-void isHoverOver(const Rectangle& ButtonPos, Color& ButtonColor, Color& TextColor);
+bool HoverOver(const Rectangle& ButtonPos, Color& ButtonColor, Color& TextColor);
 
 int main()
 {
@@ -89,19 +96,27 @@ int main()
 	Font FontMainStyle = LoadFontEx(FONT_PATH, FONT_SIZE, 0, 0);
 	Font FontTimeStyle = LoadFontEx(FONT_TIME_PATH, FONT_TIME_SIZE, 0, 0);
 	Font FontButtonStyle = LoadFontEx(FONT_BUTTON_PATH, FONT_BUTTON_SIZE, 0, 0);
+	Font FontCalculatorStyle = LoadFontEx(FONT_CALCULATOR_PATH, FONT_CALCULATOR_SIZE, 0, 0);
 	Image DayNightImage = LoadImage(DAY_NIGHT);
 	Texture2D DayNightTexture = LoadTextureFromImage(DayNightImage);
 
-	while (!WindowShouldClose()) {
+	Color MainScreenColor = MAIN_SCR_OFF;
+	std::string inputExpression = "";
+	bool startUp = true;
 
+	while (!WindowShouldClose()) 
+	{
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
 
 		// Draw Calculator
 		DrawCalculator(FontMainStyle);
 
+		// Draw Main Screen Display
+		DrawMainScreenDisplay(FontCalculatorStyle, inputExpression, MainScreenColor, startUp);
+
 		// Button
-		DrawAllButtons(FontButtonStyle);
+		DrawAllButtons(FontButtonStyle, inputExpression);
 
 		// FPS
 		DrawFPS(40, 25);
@@ -119,6 +134,7 @@ int main()
 		UnloadFont(FontMainStyle);
 		UnloadFont(FontTimeStyle);
 		UnloadFont(FontButtonStyle);
+		UnloadFont(FontCalculatorStyle);
 	}
 
 	return 0;
@@ -140,8 +156,54 @@ void DrawCalculator(const Font& FontMainStyle)
 	DrawTextEx(FontMainStyle, "MX-8B", CasioSeriesPos(), (FONT_SIZE / 20.f), 2, LIGHTGRAY);
 	// Main Screen Border
 	DrawRectangleRounded(MainScrBorder(), 0.10f, 10, { 50,50,50,200 });
-	// Main Screen
-	DrawRectangleRounded(MainScr(), 0.1f, 10, MAIN_SCR_CLR);
+}
+
+void DrawMainScreenDisplay
+(
+	const Font& FontCalculatorStyle,
+	std::string& inputExpression,
+	Color& MainScreenColor,
+	bool& stateOFF
+)
+{
+	// Main Screen	
+	if (inputExpression.find("ON") != std::string::npos) {
+		stateOFF = false;
+		MainScreenColor = MAIN_SCR_ON;
+		inputExpression.clear();
+	}
+	else if (inputExpression.find("OFF") != std::string::npos) {
+		stateOFF = true;
+		MainScreenColor = MAIN_SCR_OFF;
+		inputExpression.clear();
+	}
+	else if (stateOFF == true) {
+		inputExpression.clear();
+	}
+
+	// Draw Main Screen
+	DrawRectangleRounded(MainScr(), 0.1f, 10, MainScreenColor);
+
+	float fontSizeDevider = 5.f;
+	float fontSize = (float)FONT_CALCULATOR_SIZE / fontSizeDevider;
+	float space = 2;
+	const char* Text = TextFormat("%s", inputExpression.c_str());
+	Vector2 TextSize = MeasureTextEx(FontCalculatorStyle, Text, fontSize, space);
+
+	//Vector2 TextPos{ 420 - TextSize.x,120 };
+	float right_pad = 10;
+	Vector2 TextPos{
+		(float)(MainScr().x + MainScr().width - right_pad) - TextSize.x,
+		(float)(MainScr().height / 2) + TextSize.y - 6};
+
+	DrawTextEx(
+		FontCalculatorStyle,
+		Text,
+		TextPos,
+		fontSize,
+		space,
+		BLACK
+	);
 }
 
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture)
@@ -159,7 +221,7 @@ void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture)
 void DayNight(int& time_hours, const Texture2D& DayNightTexture)
 {
 	size_t icon_index = 0;
-	if (time_hours > 6 && time_hours < 18) {
+	if (time_hours >= 6 && time_hours <= 18) {
 		icon_index = 0;
 	}
 	else {
@@ -366,10 +428,10 @@ Rectangle MainScrBorder()
 	return MainScrBorder;
 }
 
-void DrawAllButtons(Font& FontButtonStyle)
+void DrawAllButtons(Font& FontButtonStyle, std::string& inputExpression)
 {
 	// Assets
-	std::vector<const char*> TopButtons{ "MU", "OFF" };
+	std::vector<const char*> TopButtons{ "<-", "OFF" };
 
 	std::vector<std::vector<const char*>> AllButtons
 	{
@@ -383,7 +445,7 @@ void DrawAllButtons(Font& FontButtonStyle)
 	// All Buttons
 	float spaceW = 17;
 	float spaceH = 17;
-	float buttonWidth = (490 / 5) - 30.f;
+	float buttonWidth = (float)(490 / 5) - 30.f;
 	float buttonHeight = 52.5;
 
 	// TopButtons
@@ -414,6 +476,10 @@ void DrawAllButtons(Font& FontButtonStyle)
 
 		fontSizeDevider = 6.f;
 
+		/*if (symbol == "<-") {
+			fontSizeDevider = 5.f;
+		}*/
+
 		ButtonPos = Rectangle
 		{
 			xStart + ((3 + i) * buttonWidth) + ((3 + i) * spaceW),
@@ -430,7 +496,30 @@ void DrawAllButtons(Font& FontButtonStyle)
 			ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2 
 		};
 
-		isHoverOver(ButtonPos, ButtonColor, TextColor);
+		bool isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
+
+		if (isHoverOver == true && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			ButtonColor = GREEN;
+			if (symbol != nullptr) {
+				if (symbol == "<-" && inputExpression.empty()) {
+					inputExpression = "";
+				}
+				else if (symbol == "<-" && !inputExpression.empty()) {
+					inputExpression.pop_back();
+				}
+				else {
+					inputExpression += symbol;
+				}
+			}
+		}
+
+		else if (isHoverOver == true && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			ButtonColor = GREEN;
+			
+		}
+		else {
+			isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
+		}
 
 		DrawRectangleRounded(ButtonPos, roundness, segments, ButtonColor);
 
@@ -625,7 +714,41 @@ void DrawAllButtons(Font& FontButtonStyle)
 				
 			}
 
-			isHoverOver(ButtonPos, ButtonColor, TextColor);
+			//bool isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
+
+			bool isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
+
+			if (isHoverOver == true && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+				ButtonColor = GREEN;
+				if (symbol != nullptr) {
+					if (symbol == "+/-") {
+						if (inputExpression.empty()) {
+							inputExpression = "";
+						}
+						else if (inputExpression.at(0) == '-') {
+							inputExpression.erase(inputExpression.begin());
+						}
+						else {
+							inputExpression.insert(inputExpression.begin(), '-');
+						}
+					}
+					else if (symbol == "/") {
+						inputExpression += ("/");
+					}
+
+					else {
+						inputExpression += symbol;
+					}
+				}
+
+			}
+			else if (isHoverOver == true && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+				ButtonColor = GREEN;
+
+			}
+			else {
+				isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
+			}
 
 			DrawRectangleRounded(ButtonPos, roundness, segments, ButtonColor);
 
@@ -641,14 +764,16 @@ void DrawAllButtons(Font& FontButtonStyle)
 	}
 }
 
-void isHoverOver(const Rectangle& ButtonPos, Color& ButtonColor, Color& TextColor)
+bool HoverOver(const Rectangle& ButtonPos, Color& ButtonColor, Color& TextColor)
 {
 	if (CheckCollisionPointRec(GetMousePosition(), ButtonPos)) {
 		ButtonColor = ColorHover;
 		TextColor = BLACK;
+		return true;
 	}
 	else {
 		TextColor = CAL_COL_FONT;
+		return false;
 	}
 }
 
