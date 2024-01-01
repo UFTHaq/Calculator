@@ -27,7 +27,7 @@
 //#define FONT_BUTTON_PATH {"Fonts/Orbitron/static/Orbitron-Bold.ttf"}
 //#define FONT_BUTTON_PATH {"Fonts/Ubuntu/Ubuntu-Medium.ttf"}
 #define FONT_BUTTON_PATH {"Fonts/Roboto_Mono/static/RobotoMono-Medium.ttf"}
-#define FONT_BUTTON_SIZE 200
+#define FONT_BUTTON_SIZE 250
 //#define FONT_CALCULATOR_PATH {"Fonts/Roboto_Mono/static/RobotoMono-Medium.ttf"}
 #define FONT_CALCULATOR_PATH {"Fonts/technology/Technology-Bold.ttf"}
 #define FONT_CALCULATOR_SIZE 400
@@ -35,6 +35,7 @@
 #define ICON {"Icons/calculator.png"}
 #define TITLE {"CALCULATOR"}
 #define DAY_NIGHT {"Icons/DayNight.png"}
+#define LABEL {"Icons/Label.png"}
 
 #define CALC_WIDTH 490
 #define CALC_HEIGHT 690
@@ -48,12 +49,159 @@
 Color CAL_COL_FONT = LIGHTGRAY;
 Color ColorHover = SKYBLUE;
 
-struct Button {
-	Rectangle rect{};
-	Color color{};
-	const char* label{};
-	float fontsize{};
+struct ButtonComponent {
+	float h{};
+	float w{};
+	float space{};
 };
+
+enum ButtonState {
+	DEFAULT = 0,
+	HOVER,
+	CLICKED
+};
+
+enum ButtonImage {
+	BUT_DEL = 0,
+	BUT_OFF,
+	BUT_MC,
+	BUT_MR,
+	BUT_MMIN,
+	BUT_MPLUS,
+	BUT_DIVIDE,
+	BUT_SQRT,
+	BUT_7,
+	BUT_8,
+	BUT_9,
+	BUT_MULTIPLY,
+	BUT_PERCENT,
+	BUT_4,
+	BUT_5,
+	BUT_6,
+	BUT_MINUS,
+	BUT_PLUSMINUS,
+	BUT_1,
+	BUT_2,
+	BUT_3,
+	BUT_PLUS,
+	BUT_C_AC_ON,
+	BUT_0,
+	BUT_COMA,
+	BUT_EQUAL
+};
+
+class Button {
+private:
+	float roundness = 0.3f;
+	int segments = 10;
+	float spacing = 2;
+	Vector2 textPos{};
+	Vector2 textPosDraw{};
+	Color defaultlabelColor{ RAYWHITE };
+	Color hoverlabelColor{ BLACK };
+
+public:
+	Rectangle rect{};
+	Color defaultColor{};
+	Color hoverColor{};
+	Color clickedColor{};
+
+	ButtonState state{};
+
+	Image image{};
+	Texture2D texture{};
+	float labelSize{};
+	float offsetX{ 8.F };
+	float offsetY{};
+
+	Rectangle source{};
+	Rectangle dest{};
+	size_t icon_index = {};
+	Color labelColor{};
+	
+	// Constructor
+	Button(Rectangle r, Color defaultC, Color hoverC, Color clickedC, ButtonImage image, Texture2D texture, float labelSize)
+		: rect(r), defaultColor(defaultC), hoverColor(hoverC), clickedColor(clickedC),
+		texture(texture), labelSize(labelSize),
+		state(DEFAULT) {
+
+		icon_index = static_cast<size_t>(image);
+	}
+
+	// Overloading Constructor
+	Button(Rectangle r, Color defaultC, Color hoverC, Color clickedC, ButtonImage image, Texture2D texture, float labelSize, float offsetY)
+		: rect(r), defaultColor(defaultC), hoverColor(hoverC), clickedColor(clickedC),
+		texture(texture), labelSize(labelSize), offsetY(offsetY),
+		state(DEFAULT) {
+
+		icon_index = static_cast<size_t>(image);
+	}
+
+
+	void Draw() {
+		Color buttonColor{};
+		Color labelColor{};
+
+		switch (state)
+		{
+		case DEFAULT:
+			buttonColor = defaultColor;
+			labelColor = defaultlabelColor;
+			break;
+		case HOVER:
+			buttonColor = hoverColor;
+			labelColor = hoverlabelColor;
+			break;
+		case CLICKED:
+			buttonColor = clickedColor;
+			labelColor = hoverlabelColor;
+			break;
+		default:
+			break;
+		}
+
+		float icon_size = 380;
+		source = { (float)icon_size * icon_index, 0, icon_size, icon_size };
+
+		Rectangle dest = {
+			rect.x + offsetX,
+			rect.y + offsetY,
+			labelSize,
+			labelSize
+		};
+
+		DrawRectangleRounded(rect, roundness, segments, buttonColor);
+		DrawTexturePro(texture, source, dest, Vector2{ 0 }, 0, labelColor);
+	}
+
+	bool IsMouseOver() const {
+		return CheckCollisionPointRec(GetMousePosition(), rect);
+	}
+
+	bool OnClick(std::string& inputExpression, ButtonState& lastOperatorState) {
+		if (IsMouseOver() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+			state = CLICKED;
+
+			/*if (std::string("+-x/").find(label) != std::string::npos) {
+				lastOperatorState = state;
+			}*/
+
+			return true;
+		}
+		else if (IsMouseOver() && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+			state = CLICKED;
+		}
+		else if (IsMouseOver()) {
+			state = HOVER;
+		}
+		else {
+			state = DEFAULT;
+		}
+
+		return false;
+	}
+};
+
 
 struct CasioScr {
 	float pad{};
@@ -66,7 +214,8 @@ CasioScr MainScrSet{ 45, 100, 100 };
 
 Rectangle CasioBaseFrame();
 void DrawCalculator(const Font& FontMainStyle);
-void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputExpression, Color& MainScreenColor, bool& startUp);
+std::vector<Button> SetupButtons(const Texture2D& LabelTexture);
+//void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputExpression, Color& MainScreenColor, bool& startUp);
 void DayNight(int& time_hours, const Texture2D& DayNightTexture);
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture);
 Rectangle CasioFrontFrame();
@@ -82,9 +231,7 @@ void Battery(int& time_hours);
 Rectangle MainScr();
 Rectangle MainScrBorder();
 
-void DrawAllButtons(Font& FontButtonStyle, std::string& inputExpression);
 
-bool HoverOver(const Rectangle& ButtonPos, Color& ButtonColor, Color& TextColor);
 
 int main()
 {
@@ -100,10 +247,16 @@ int main()
 	Font FontCalculatorStyle = LoadFontEx(FONT_CALCULATOR_PATH, FONT_CALCULATOR_SIZE, 0, 0);
 	Image DayNightImage = LoadImage(DAY_NIGHT);
 	Texture2D DayNightTexture = LoadTextureFromImage(DayNightImage);
+	Image LabelImage = LoadImage(LABEL);
+	Texture2D LabelTexture = LoadTextureFromImage(LabelImage);
 
 	Color MainScreenColor = MAIN_SCR_OFF;
 	std::string inputExpression = "";
 	bool startUp = true;
+
+	std::vector<Button> AllButtons = SetupButtons(LabelTexture);
+
+	ButtonState lastOperatorState = DEFAULT;
 
 	while (!WindowShouldClose()) 
 	{
@@ -114,10 +267,16 @@ int main()
 		DrawCalculator(FontMainStyle);
 
 		// Draw Main Screen Display
-		DrawMainScreenDisplay(FontCalculatorStyle, inputExpression, MainScreenColor, startUp);
+		//DrawMainScreenDisplay(FontCalculatorStyle, inputExpression, MainScreenColor, startUp);
 
 		// Button
-		DrawAllButtons(FontButtonStyle, inputExpression);
+		//DrawAllButtons(FontButtonStyle, inputExpression);
+
+
+		for (auto& button : AllButtons) {
+			button.Draw();
+			button.OnClick(inputExpression, lastOperatorState);
+		}
 
 		// FPS
 		DrawFPS(40, 25);
@@ -142,6 +301,72 @@ int main()
 	return 0;
 }
 
+std::vector<Button> SetupButtons(const Texture2D& LabelTexture)
+{
+	float btnH = 52.F;
+	float btnW = 68.5F;
+	float btnSpc = 18.F;
+	ButtonComponent BtnSize{ btnH, btnW, btnSpc };
+	std::vector<float> col{};
+	for (size_t i = 0; i < 5; i++) {
+		col.push_back((float)45 + (i * (BtnSize.w + BtnSize.space)));
+	}
+
+	std::vector<float> row{};
+	for (size_t i = 0; i < 5; i++) {
+		row.push_back((float)320 + (i * (BtnSize.h + BtnSize.space)));
+	}
+
+	// ROW1
+	Button ButtonDEL	({ col[3], 267 , BtnSize.w,(BtnSize.h * 2 / 3) }, CAL_BLK, SKYBLUE, GREEN, BUT_DEL, LabelTexture, btnH, -9.F);
+	Button ButtonOFF	({ col[4], 267, BtnSize.w, (BtnSize.h * 2 / 3) }, CAL_BLK, SKYBLUE, GREEN, BUT_OFF, LabelTexture, btnH, -9.F);
+
+	// ROW2
+	Button ButtonMC		({ col[0], row[0], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_MC, LabelTexture, btnH);
+	Button ButtonMR		({ col[1], row[0], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_MR, LabelTexture, btnH);
+	Button ButtonMMin	({ col[2], row[0], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_MMIN, LabelTexture, btnH);
+	Button ButtonMPlus	({ col[3], row[0], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_MPLUS, LabelTexture, btnH);
+	Button ButtonDevide	({ col[4], row[0], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_DIVIDE, LabelTexture, btnH);
+
+	// ROW3
+	Button ButtonSQRT	({ col[0], row[1], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_SQRT, LabelTexture, btnH);
+	Button Button7		({ col[1], row[1], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_7, LabelTexture, btnH);
+	Button Button8		({ col[2], row[1], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_8, LabelTexture, btnH);
+	Button Button9		({ col[3], row[1], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_9, LabelTexture, btnH);
+	Button ButtonX		({ col[4], row[1], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_MULTIPLY, LabelTexture, btnH);
+
+	// ROW4
+	Button ButtonPercent({ col[0], row[2], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_PERCENT, LabelTexture, btnH);
+	Button Button4		({ col[1], row[2], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_4, LabelTexture, btnH);
+	Button Button5		({ col[2], row[2], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_5, LabelTexture, btnH);
+	Button Button6		({ col[3], row[2], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_6, LabelTexture, btnH);
+	Button ButtonMin	({ col[4], row[2], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_MINUS, LabelTexture, btnH);
+
+	// ROW5
+	Button ButtonPlusMin({ col[0], row[3], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_PLUSMINUS, LabelTexture, btnH);
+	Button Button1		({ col[1], row[3], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_1, LabelTexture, btnH);
+	Button Button2		({ col[2], row[3], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_2, LabelTexture, btnH);
+	Button Button3		({ col[3], row[3], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_3, LabelTexture, btnH);
+	Button ButtonPlus	({ col[4], row[3], BtnSize.w, (BtnSize.h * 2 + BtnSize.space) }, CAL_BLK, SKYBLUE, GREEN, BUT_PLUS, LabelTexture, btnH, ((BtnSize.h + BtnSize.space) / 2));
+
+	// ROW6
+	Button ButtonON		({ col[0], row[4], BtnSize.w, BtnSize.h }, CAL_ORA, SKYBLUE, GREEN, BUT_C_AC_ON, LabelTexture, btnH);
+	Button Button0		({ col[1], row[4], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_0, LabelTexture, btnH);
+	Button ButtonComa	({ col[2], row[4], BtnSize.w, BtnSize.h }, CAL_GRA, SKYBLUE, GREEN, BUT_COMA, LabelTexture, btnH);
+	Button ButtonEqual	({ col[3], row[4], BtnSize.w, BtnSize.h }, CAL_BLK, SKYBLUE, GREEN, BUT_EQUAL, LabelTexture, btnH);
+
+	std::vector<Button> AllButtons{
+		ButtonDEL, ButtonOFF,
+		ButtonMC, ButtonMR, ButtonMMin, ButtonMPlus, ButtonDevide,
+		ButtonSQRT, Button7, Button8, Button9, ButtonX,
+		ButtonPercent, Button4, Button5, Button6, ButtonMin,
+		ButtonPlusMin, Button1, Button2, Button3, ButtonPlus,
+		ButtonON, Button0, ButtonComa, ButtonEqual,
+	};
+
+	return AllButtons;
+}
+
 void DrawCalculator(const Font& FontMainStyle)
 {
 	// Base
@@ -158,90 +383,8 @@ void DrawCalculator(const Font& FontMainStyle)
 	DrawTextEx(FontMainStyle, "MX-8B", CasioSeriesPos(), (FONT_SIZE / 20.f), 2, LIGHTGRAY);
 	// Main Screen Border
 	DrawRectangleRounded(MainScrBorder(), 0.10f, 10, { 50,50,50,200 });
-}
-
-void DrawMainScreenDisplay
-(
-	const Font& FontCalculatorStyle,
-	std::string& inputExpression,
-	Color& MainScreenColor,
-	bool& stateOFF
-)
-{
-	// Main Screen	
-	if (inputExpression.find("ON") != std::string::npos) {
-		stateOFF = false;
-		MainScreenColor = MAIN_SCR_ON;
-		inputExpression.clear();
-	}
-	else if (inputExpression.find("OFF") != std::string::npos) {
-		stateOFF = true;
-		MainScreenColor = MAIN_SCR_OFF;
-		inputExpression.clear();
-	}
-	else if (stateOFF == true) {
-		inputExpression.clear();
-	}
-
-	// Draw Main Screen
-	DrawRectangleRounded(MainScr(), 0.1f, 10, MainScreenColor);
-
-	float fontSizeDevider = 5.75f;
-	float fontSize = (float)FONT_CALCULATOR_SIZE / fontSizeDevider;
-	float space = 1.5f;
-
-	std::string displayText = inputExpression.c_str();
-	size_t lenDisplayText = displayText.size();
-
-	if (lenDisplayText > 0) {
-		char lastElementPosition = inputExpression.at(lenDisplayText - 1);
-	}
-	
-	size_t count = 0;
-	for (auto& c : displayText) {
-		if (isdigit(c)) {
-			count++;
-		}
-	}
-
-	size_t digit = 3;
-
-	// Check if there is a decimal point in the displayText
-	//bool hasDecimal = (displayText.find(',') != std::string::npos);
-
-	/*if (count > 3 && count <= 6) {
-		displayText.insert(displayText.end() - ((digit * 1) + (1 * 0)), '.');
-	}
-	else if (count > 6 && count <= 9) {
-		displayText.insert(displayText.end() - ((digit * 1) + (1 * 0)), '.');
-		displayText.insert(displayText.end() - ((digit * 2) + (1 * 1)), '.');
-	}
-	else if (count == 10) {
-		displayText.insert(displayText.end() - ((digit * 1) + (1 * 0)), '.');
-		displayText.insert(displayText.end() - ((digit * 2) + (1 * 1)), '.');
-		displayText.insert(displayText.end() - ((digit * 3) + (1 * 2)), '.');
-	}*/
-
-
-	const char* displayTextToChar = displayText.c_str();
-
-	const char* Text = TextFormat("%s", displayTextToChar);
-	Vector2 TextSize = MeasureTextEx(FontCalculatorStyle, Text, fontSize, space);
-
-	//Vector2 TextPos{ 420 - TextSize.x,120 };
-	float right_pad = 10;
-	Vector2 TextPos{
-		(float)(MainScr().x + MainScr().width - right_pad) - TextSize.x,
-		(float)(MainScr().height / 2) + TextSize.y + 7};
-
-	DrawTextEx(
-		FontCalculatorStyle,
-		Text,
-		TextPos,
-		fontSize,
-		space,
-		BLACK
-	);
+	// Main Screen
+	DrawRectangleRounded(MainScr(), 0.1f, 10, MAIN_SCR_ON);
 }
 
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture)
@@ -466,381 +609,7 @@ Rectangle MainScrBorder()
 	return MainScrBorder;
 }
 
-void DrawAllButtons(Font& FontButtonStyle, std::string& inputExpression)
-{
-	// Assets
-	std::vector<const char*> TopButtons{ "<-", "OFF" };
 
-	std::vector<std::vector<const char*>> AllButtons
-	{
-		{ "MC", "sqrt", "%%", "+/-", "AC/ON"},
-		{ "MR", "7", "4", "1", "0" },
-		{ "M-", "8", "5", "2", "," },
-		{ "M+", "9", "6", "3", "=" },
-		{ "/", "x", "-", "+" }
-	};
-
-	// All Buttons
-	float spaceW = 17;
-	float spaceH = 17;
-	float buttonWidth = (float)(490 / 5) - 30.f;
-	float buttonHeight = 52.5;
-
-	// TopButtons
-	float topButtonH = buttonHeight / 1.65f;
-
-	// Button Start Position
-	float xStart = 45;
-	float yStart = 320;
-
-	// Draw Button
-	Rectangle ButtonPos{};
-	float roundness = 0.35f;
-	int segments = 10;
-	Color ButtonColor{};
-
-	// Draw Label Text
-	Vector2 TextPosDraw{};
-	float fontSizeDevider = 5.f;
-	Vector2 TextPos{};
-	float TextSpace = 0;
-	Color TextColor = CAL_COL_FONT;
-
-	const char* symbol = nullptr;
-
-	for (size_t i = 0; i < TopButtons.size(); i++) {
-		symbol = TopButtons[i];
-		ButtonColor = CAL_BLK;
-
-		fontSizeDevider = 6.f;
-
-		if (symbol == "<-") {
-			fontSizeDevider = 5.f;
-		}
-
-		ButtonPos = Rectangle
-		{
-			xStart + ((3 + i) * buttonWidth) + ((3 + i) * spaceW),
-			yStart - topButtonH - spaceH,
-			buttonWidth,
-			topButtonH
-		};
-
-		TextPos = MeasureTextEx(FontButtonStyle, TextFormat(symbol), (float)(FONT_BUTTON_SIZE / fontSizeDevider), 0);
-
-		TextPosDraw = Vector2
-		{
-			ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2),
-			ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2 
-		};
-
-		bool isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
-
-		if (isHoverOver == true && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-			ButtonColor = GREEN;
-			if (symbol != nullptr) {
-				if (symbol == "<-" && inputExpression.empty()) {
-					inputExpression = "";
-				}
-				else if (symbol == "<-" && !inputExpression.empty()) {
-					inputExpression.pop_back();
-				}
-				else {
-					inputExpression += symbol;
-				}
-			}
-		}
-
-		else if (isHoverOver == true && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-			ButtonColor = GREEN;
-			
-		}
-		else {
-			isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
-		}
-
-		DrawRectangleRounded(ButtonPos, roundness, segments, ButtonColor);
-
-		DrawTextEx(
-			FontButtonStyle,
-			TextFormat(symbol),
-			TextPosDraw,
-			(float)FONT_BUTTON_SIZE / fontSizeDevider,
-			TextSpace,
-			TextColor
-		);
-
-	}
-
-	for (size_t i = 0; i < AllButtons.size(); i++) {
-		for (size_t j = 0; j < AllButtons[i].size(); j++) {
-			symbol = AllButtons[i][j];
-
-			if (symbol == "AC/ON") {
-	 			ButtonColor = CAL_ORA;
-			
-				fontSizeDevider = 8.f;
-
-				ButtonPos = Rectangle
-				{
-					xStart + (i * buttonWidth) + (i * spaceW),
-					yStart + (j * buttonHeight) + (j * spaceH),
-					buttonWidth,
-					buttonHeight
-				};
-
-				TextPos = MeasureTextEx(FontButtonStyle, TextFormat(symbol), (float)(FONT_BUTTON_SIZE / fontSizeDevider), 0);
-
-				TextPosDraw = Vector2
-				{
-					ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2),
-					ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2
-				};
-
-			}
-			else if (
-				symbol == "," ||
-	 			symbol == "0" ||
-	 			symbol == "1" ||
-	 			symbol == "2" ||
-	 			symbol == "3" ||
-	 			symbol == "4" ||
-	 			symbol == "5" ||
-	 			symbol == "6" ||
-	 			symbol == "7" ||
-	 			symbol == "8" ||
-	 			symbol == "9") {
-	 		
-	 			ButtonColor = CAL_GRA;
-			
-				fontSizeDevider = 3.75f;
-				
-				ButtonPos = Rectangle
-				{
-					xStart + (i * buttonWidth) + (i * spaceW),
-					yStart + (j * buttonHeight) + (j * spaceH),
-					buttonWidth,
-					buttonHeight
-				};
-
-				TextPos = MeasureTextEx(FontButtonStyle, TextFormat(symbol), (float)(FONT_BUTTON_SIZE / fontSizeDevider), 0);
-
-				if (symbol != ",") {
-					fontSizeDevider = 3.75f;
-
-					TextPosDraw = Vector2
-					{
-						ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2),
-						ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2
-					};
-				}
-				else {
-					fontSizeDevider = 3.5f;
-
-					TextPosDraw = Vector2
-					{
-						ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2),
-						ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 13.5f
-					};
-				}
-
-			}
-			else if (symbol == "+") {
-				ButtonColor = CAL_BLK;
-			
-				fontSizeDevider = 3.5f;
-				
-				ButtonPos = Rectangle
-				{
-					xStart + (i * buttonWidth) + (i * spaceW),
-					yStart + (j * buttonHeight) + (j * spaceH),
-					buttonWidth,
-					(buttonHeight * 2) + spaceH
-				};
-
-				TextPos = MeasureTextEx(FontButtonStyle, TextFormat(symbol), (float)(FONT_BUTTON_SIZE / fontSizeDevider), 0);
-
-				TextPosDraw = Vector2
-				{
-					ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2),
-					ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2
-				};
-
-			}
-			else if (symbol == "sqrt") {
-				ButtonColor = CAL_BLK;
-
-				fontSizeDevider = 7.5f;
-				
-				ButtonPos = Rectangle
-				{
-					xStart + (i * buttonWidth) + (i * spaceW),
-					yStart + (j * buttonHeight) + (j * spaceH),
-					buttonWidth,
-					buttonHeight
-				};
-
-				TextPos = MeasureTextEx(FontButtonStyle, TextFormat(symbol), (float)(FONT_BUTTON_SIZE / fontSizeDevider), 0);
-
-				TextPosDraw = Vector2
-				{
-					ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2),
-					ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2
-				};
-
-			}
-			else if (
-				symbol == "%%" ||
-				symbol == "-" ||
-				symbol == "x" ||
-				symbol == "=") {
-
-				ButtonColor = CAL_BLK;
-
-				fontSizeDevider = 3.5f;
-				
-				ButtonPos = Rectangle
-				{
-					xStart + (i * buttonWidth) + (i * spaceW),
-					yStart + (j * buttonHeight) + (j * spaceH),
-					buttonWidth,
-					buttonHeight
-				};
-
-				TextPos = MeasureTextEx(FontButtonStyle, TextFormat(symbol), (float)(FONT_BUTTON_SIZE / fontSizeDevider), 0);
-
-				if (symbol != "x") {
-					fontSizeDevider = 3.5f;
-
-					TextPosDraw = Vector2
-					{
-						ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2),
-						ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2
-					};
-				}
-				else {
-					fontSizeDevider = 4.f;
-
-					TextPosDraw = Vector2
-					{
-						ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2) + 2.5f,
-						ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2
-					};
-				}
-
-			}
-			else {
-	 			ButtonColor = CAL_BLK;
-			
-				fontSizeDevider = 5.25f;
-
-				ButtonPos = Rectangle
-				{
-					xStart + (i * buttonWidth) + (i * spaceW),
-					yStart + (j * buttonHeight) + (j * spaceH),
-					buttonWidth,
-					buttonHeight
-				};
-
-				TextPos = MeasureTextEx(FontButtonStyle, TextFormat(symbol), (float)(FONT_BUTTON_SIZE / fontSizeDevider), 0);
-
-				TextPosDraw = Vector2
-				{
-					ButtonPos.x + (ButtonPos.width / 2) - (float)(TextPos.x / 2),
-					ButtonPos.y + (ButtonPos.height / 2) - (float)(TextPos.y / 2) - 2
-				};
-				
-			}
-
-			// Check if there is a decimal point in the displayText
-			bool hasDecimal = (inputExpression.find(',') != std::string::npos);
-
-			std::string displayText = inputExpression.c_str();
-			size_t lenDisplayText = displayText.size();
-
-			char lastElement = ' ';
-			if (lenDisplayText > 0) {
-				lastElement = inputExpression.at(lenDisplayText - 1);
-			}
-
-			bool isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
-
-			if (isHoverOver == true && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-				ButtonColor = GREEN;
-				if (symbol != nullptr) {
-					if (symbol == "+/-") {
-						if (inputExpression.empty()) {
-							inputExpression = "";
-						}
-						else if (inputExpression.at(0) == '-') {
-							inputExpression.erase(inputExpression.begin());
-						}
-						else {
-							inputExpression.insert(inputExpression.begin(), '-');
-						}
-					}
-
-					else if (symbol == "/") {
-						inputExpression += ("/");
-					}
-
-					else if (inputExpression.size() >= 10) {
-						inputExpression.erase(inputExpression.end());
-						inputExpression += "";
-					}
-
-					else if (hasDecimal && symbol == ",") {
-						inputExpression += "";
-					}
-
-
-					else {
-						inputExpression += symbol;
-					}
-				}
-			}
-
-			else if (isHoverOver == true && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
-				ButtonColor = GREEN;
-
-			}
-
-			/*else if ( (const char*)lastElement == AllButtons[4][1]) {
-				ButtonColor = RED;
-			}*/
-				
-			else {
-				isHoverOver = HoverOver(ButtonPos, ButtonColor, TextColor);
-			}
-
-			
-
-			DrawRectangleRounded(ButtonPos, roundness, segments, ButtonColor);
-
-			DrawTextEx(
-				FontButtonStyle,
-				TextFormat(symbol),
-				TextPosDraw,
-				(float)FONT_BUTTON_SIZE / fontSizeDevider,
-				TextSpace,
-				TextColor
-			);
-		}
-	}
-}
-
-bool HoverOver(const Rectangle& ButtonPos, Color& ButtonColor, Color& TextColor)
-{
-	if (CheckCollisionPointRec(GetMousePosition(), ButtonPos)) {
-		ButtonColor = ColorHover;
-		TextColor = BLACK;
-		return true;
-	}
-	else {
-		TextColor = CAL_COL_FONT;
-		return false;
-	}
-}
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
