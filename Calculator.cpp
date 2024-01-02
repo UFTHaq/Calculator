@@ -11,6 +11,7 @@
 #include <map>
 #include <ctime>
 #include <cctype>
+#include <sstream>
 
 
 #define WINDOW_WIDTH 500
@@ -53,6 +54,11 @@ struct ButtonComponent {
 	float h{};
 	float w{};
 	float space{};
+};
+
+enum MainScreenState {
+	OFF = 0,
+	ON  = 1
 };
 
 enum ButtonState {
@@ -178,13 +184,52 @@ public:
 		return CheckCollisionPointRec(GetMousePosition(), rect);
 	}
 
-	bool OnClick(std::string& inputExpression, ButtonState& lastOperatorState) {
+	bool OnClick(std::string& inputExpression, ButtonState& lastOperatorState, Color& MainScreenColor, MainScreenState& MScrState) {
 		if (IsMouseOver() && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
 			state = CLICKED;
 
-			/*if (std::string("+-x/").find(label) != std::string::npos) {
-				lastOperatorState = state;
+			std::string buttonLabel = GetButtonLabelFromIndex(icon_index);
+
+			if (buttonLabel == "ON") {
+				if (MScrState == ON) {
+					inputExpression.clear();
+				}
+				MScrState = ON;
+			}
+			else if (buttonLabel == "OFF") {
+				MScrState = OFF;
+			}
+			else if (buttonLabel == "DEL") {
+				inputExpression.pop_back();
+			}
+			/*else if (buttonLabel == "=") {
+				inputExpression = EvaluateExpression(inputExpression);
 			}*/
+			else if (buttonLabel == "SQRT") {
+				try {
+					float value = std::stof(inputExpression);
+					value = std::sqrt(value);
+					std::string strVal = std::to_string(value);
+
+					// Check can Be int or not
+					size_t dotPos = strVal.find('.');
+					if (dotPos != std::string::npos) {
+						strVal.erase(strVal.find_last_not_of('0') + 1, std::string::npos);
+
+						if (strVal.back() == '.') {
+							strVal.pop_back();
+						}
+					}
+
+					inputExpression = strVal;
+				}
+				catch (std::invalid_argument) {
+					inputExpression = inputExpression;
+				}
+			}
+			else {
+				inputExpression += buttonLabel;
+			}
 
 			return true;
 		}
@@ -200,7 +245,41 @@ public:
 
 		return false;
 	}
+
+	std::string GetButtonLabelFromIndex(size_t index) const {
+		switch (static_cast<ButtonImage>(index))
+		{
+		case BUT_DEL:			return "DEL";
+		case BUT_OFF:			return "OFF";
+		case BUT_MC:			return "MC";
+		case BUT_MR:			return "MR";
+		case BUT_MMIN:			return "M-";
+		case BUT_MPLUS:			return "M+";
+		case BUT_DIVIDE:		return "/";
+		case BUT_SQRT:			return "SQRT";
+		case BUT_7:				return "7";
+		case BUT_8:				return "8";
+		case BUT_9:				return "9";
+		case BUT_MULTIPLY:		return "x";
+		case BUT_PERCENT:		return "%";
+		case BUT_4:				return "4";
+		case BUT_5:				return "5";
+		case BUT_6:				return "6";
+		case BUT_MINUS:			return "-";
+		case BUT_PLUSMINUS:		return "+/-";
+		case BUT_1:				return "1";
+		case BUT_2:				return "2";
+		case BUT_3:				return "3";
+		case BUT_PLUS:			return "+";
+		case BUT_C_AC_ON:		return "ON";
+		case BUT_0:				return "0";
+		case BUT_COMA:			return ",";
+		case BUT_EQUAL:			return "=";
+		default:				return "";
+		}
+	}
 };
+
 
 
 struct CasioScr {
@@ -213,9 +292,9 @@ CasioScr SecondScrSet{ 145, 37, 40 };
 CasioScr MainScrSet{ 45, 100, 100 };
 
 Rectangle CasioBaseFrame();
-void DrawCalculator(const Font& FontMainStyle);
+void DrawCalculator(const Font& FontMainStyle, MainScreenState& MScrState);
 std::vector<Button> SetupButtons(const Texture2D& LabelTexture);
-//void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputExpression, Color& MainScreenColor, bool& startUp);
+void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputExpression, MainScreenState& MScrState);
 void DayNight(int& time_hours, const Texture2D& DayNightTexture);
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture);
 Rectangle CasioFrontFrame();
@@ -231,7 +310,7 @@ void Battery(int& time_hours);
 Rectangle MainScr();
 Rectangle MainScrBorder();
 
-
+std::string EvaluateExpression(std::string& InputExpression);
 
 int main()
 {
@@ -252,11 +331,15 @@ int main()
 
 	Color MainScreenColor = MAIN_SCR_OFF;
 	std::string inputExpression = "";
+	size_t sizeInput = 0;
+	std::string lastInput = "";
+
 	bool startUp = true;
 
 	std::vector<Button> AllButtons = SetupButtons(LabelTexture);
 
 	ButtonState lastOperatorState = DEFAULT;
+	MainScreenState MScrState = OFF;
 
 	while (!WindowShouldClose()) 
 	{
@@ -264,19 +347,17 @@ int main()
 		ClearBackground(RAYWHITE);
 
 		// Draw Calculator
-		DrawCalculator(FontMainStyle);
+		DrawCalculator(FontMainStyle, MScrState);
 
 		// Draw Main Screen Display
-		//DrawMainScreenDisplay(FontCalculatorStyle, inputExpression, MainScreenColor, startUp);
+		DrawMainScreenDisplay(FontCalculatorStyle, inputExpression, MScrState);
 
 		// Button
-		//DrawAllButtons(FontButtonStyle, inputExpression);
-
-
 		for (auto& button : AllButtons) {
 			button.Draw();
-			button.OnClick(inputExpression, lastOperatorState);
+			button.OnClick(inputExpression, lastOperatorState, MainScreenColor, MScrState);
 		}
+
 
 		// FPS
 		DrawFPS(40, 25);
@@ -367,7 +448,66 @@ std::vector<Button> SetupButtons(const Texture2D& LabelTexture)
 	return AllButtons;
 }
 
-void DrawCalculator(const Font& FontMainStyle)
+void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputExpression, MainScreenState& MScrState)
+{
+
+	if (MScrState == ON) {
+		const char* displayText = inputExpression.c_str();
+
+		float fontSizeDivider = 5.75F;
+		float fontSize = FONT_CALCULATOR_SIZE / fontSizeDivider;
+		float space = 1.5F;
+		float rightPad = 10.F;
+
+		const char* Text = displayText;
+		Vector2 TextSize = MeasureTextEx(FontCalculatorStyle, Text, fontSize, space);
+		Vector2 TextPos = {
+			(float)(MainScr().x + MainScr().width - rightPad) - TextSize.x,
+			(float)(MainScr().height / 2) + TextSize.y + 7
+		};
+
+		DrawTextEx(FontCalculatorStyle, Text, TextPos, fontSize, space, BLACK);
+		
+	}
+	else {
+		inputExpression.clear();
+	}
+}
+
+std::string EvaluateExpression(std::string& InputExpression) {
+	std::istringstream iss(InputExpression);
+
+	char op;
+	double num1, num2;
+
+	iss >> num1;
+
+	while (iss >> op >> num2) {
+		switch (op)
+		{
+		case '+':
+			num1 += num2;
+		case '-':
+			num1 -= num2;
+		case 'x':
+			num1 *= num2;
+		case '/':
+			if (num2 != 0) {
+				num1 /= num2;
+			}
+			else {
+				InputExpression = "Error: Division by zero!";
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	return InputExpression;
+}
+
+void DrawCalculator(const Font& FontMainStyle, MainScreenState& MScrState)
 {
 	// Base
 	DrawRectangleRounded(CasioBaseFrame(), 0.1f, 2, DARKGRAY);
@@ -384,7 +524,23 @@ void DrawCalculator(const Font& FontMainStyle)
 	// Main Screen Border
 	DrawRectangleRounded(MainScrBorder(), 0.10f, 10, { 50,50,50,200 });
 	// Main Screen
-	DrawRectangleRounded(MainScr(), 0.1f, 10, MAIN_SCR_ON);
+
+	Color MainScreenColor{};
+
+	switch (MScrState)
+	{
+	case OFF:
+		MainScreenColor = MAIN_SCR_OFF;
+		break;
+	case ON:
+		MainScreenColor = MAIN_SCR_ON;
+		break;
+	default:
+		break;
+	}
+
+	DrawRectangleRounded(MainScr(), 0.1f, 10, MainScreenColor);
+	//MainScreenColor
 }
 
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture)
