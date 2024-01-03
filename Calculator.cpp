@@ -196,79 +196,21 @@ public:
 
 			std::string buttonLabel = GetButtonLabelFromIndex(icon_index);
 
-			if (buttonLabel == "ON") {
+			switch (static_cast<ButtonImage>(icon_index))
+			{
+			case BUT_C_AC_ON:
 				if (MScrState == ON) {
 					inputExpression.clear();
 				}
 				MScrState = ON;
-			}
-			else if (buttonLabel == "OFF") {
+				break;
+			case BUT_OFF:
 				MScrState = OFF;
-			}
-			else if (buttonLabel == "DEL") {
+				break;
+			case BUT_DEL:
 				inputExpression.pop_back();
-			}
-			else if (buttonLabel == "%") {
-				try {
-					float value = std::stof(inputExpression);
-					value /= 100.F;
-					std::string strVal = std::to_string(value);
-			
-					// Check can Be rounded
-					strVal = isCanBeRounded(strVal);
-			
-					inputExpression = strVal;
-				}
-				catch (std::invalid_argument) {
-					inputExpression = inputExpression;
-				}
-			}
-			else if (buttonLabel == "=") {
-				inputExpression = EvaluateExpression(inputExpression);
-			}
-			else if (buttonLabel == "SQRT") {
-				try {
-					float value = std::stof(inputExpression);
-					value = std::sqrt(value);
-					std::string strVal = std::to_string(value);
-			
-					// Check can Be rounded
-					strVal = isCanBeRounded(strVal);
-			
-					inputExpression = strVal;
-				}
-				catch (std::invalid_argument) {
-					inputExpression = inputExpression;
-				}
-			}
-			else if (inputExpression.size() > 10) {
-				inputExpression += "";
-			}
-			else if (buttonLabel == "+/-") {
-				if (inputExpression.front() == '-') {
-					inputExpression.erase(inputExpression.begin());
-				}
-				else {
-					inputExpression.insert(inputExpression.begin(), '-');
-				}
-			}
-			else if (buttonLabel == "+") {
-				if (inputExpression.back() == '+') {
-					inputExpression;
-				}
-				else {
-					inputExpression += buttonLabel;
-				}
-			}
-			else if (buttonLabel == "-") {
-				if (inputExpression.back() == '-') {
-					inputExpression;
-				}
-				else {
-					inputExpression += buttonLabel;
-				}
-			}
-			else if (buttonLabel == "x") {
+				break;
+			case BUT_MULTIPLY:
 				if (inputExpression.back() == 'x') {
 					inputExpression;
 				}
@@ -278,8 +220,8 @@ public:
 				else {
 					inputExpression += buttonLabel;
 				}
-			}
-			else if (buttonLabel == "/") {
+				break;
+			case BUT_DIVIDE:
 				if (inputExpression.back() == '/') {
 					inputExpression;
 				}
@@ -289,21 +231,76 @@ public:
 				else {
 					inputExpression += buttonLabel;
 				}
-			}
-			else if (buttonLabel == ".") {
-				if (inputExpression.find('.') != std::string::npos) {
-					inputExpression;
+				break;
+			case BUT_PERCENT:
+				try {
+					float value = std::stof(inputExpression);
+					value /= 100.F;
+					std::string strVal = std::to_string(value);
+
+					// Check can Be rounded
+					strVal = isCanBeRounded(strVal);
+
+					inputExpression = strVal;
+				}
+				catch (std::invalid_argument) {
+					inputExpression = inputExpression;
+				}
+				break;
+			case BUT_SQRT:
+				try {
+					float value = std::stof(inputExpression);
+					value = std::sqrt(value);
+					std::string strVal = std::to_string(value);
+
+					// Check can Be rounded
+					strVal = isCanBeRounded(strVal);
+
+					inputExpression = strVal;
+				}
+				catch (std::invalid_argument) {
+					inputExpression = inputExpression;
+				}
+				break;
+			case BUT_PLUSMINUS:
+				if (inputExpression.front() == '-') {
+					inputExpression.erase(inputExpression.begin());
+				}
+				else {
+					inputExpression.insert(inputExpression.begin(), '-');
+				}
+				break;
+			case BUT_EQUAL:
+				inputExpression = EvaluateExpression(inputExpression);
+				break;
+			case BUT_MC:
+			case BUT_MR:
+			case BUT_MMIN:
+			case BUT_MPLUS:
+				break;
+			case BUT_PLUS:
+			case BUT_MINUS:
+			case BUT_0:
+			case BUT_1:
+			case BUT_2:
+			case BUT_3:
+			case BUT_4:
+			case BUT_5:
+			case BUT_6:
+			case BUT_7:
+			case BUT_8:
+			case BUT_9:
+			case BUT_COMA:
+				if (inputExpression.size() > 10) {
+					inputExpression += "";
 				}
 				else {
 					inputExpression += buttonLabel;
 				}
-			}
-			else if (buttonLabel == "MC" || buttonLabel == "MR" || buttonLabel == "M-" || buttonLabel == "M+") {
-				inputExpression;
-			}
+				break;
 			
-			else {
-				inputExpression += buttonLabel;
+			default:
+				break;
 			}
 
 			return true;
