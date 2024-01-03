@@ -30,7 +30,11 @@
 #define FONT_BUTTON_PATH {"Fonts/Roboto_Mono/static/RobotoMono-Medium.ttf"}
 #define FONT_BUTTON_SIZE 250
 //#define FONT_CALCULATOR_PATH {"Fonts/Roboto_Mono/static/RobotoMono-Medium.ttf"}
-#define FONT_CALCULATOR_PATH {"Fonts/technology/Technology-Bold.ttf"}
+//#define FONT_CALCULATOR_PATH {"Fonts/technology/Technology-Bold.ttf"}
+//#define FONT_CALCULATOR_PATH {"Fonts/monogram.ttf"}
+//#define FONT_CALCULATOR_PATH {"Fonts/Ubuntu/Ubuntu-Medium.ttf"}
+//#define FONT_CALCULATOR_PATH {"Fonts/SansSerifFLF/SansSerifBldFLFCond.otf"}
+#define FONT_CALCULATOR_PATH {"Fonts/Oswald/Static/Oswald-regular.ttf"}
 #define FONT_CALCULATOR_SIZE 400
 
 #define ICON {"Icons/calculator.png"}
@@ -49,6 +53,8 @@
 #define CAL_ORA CLITERAL(Color)		 { 170,  50,   5, 255 }
 Color CAL_COL_FONT = LIGHTGRAY;
 Color ColorHover = SKYBLUE;
+
+//std::string EvaluateExpression(std::string& InputExpression);
 
 struct ButtonComponent {
 	float h{};
@@ -134,7 +140,7 @@ public:
 		icon_index = static_cast<size_t>(image);
 	}
 
-	// Overloading Constructor
+	// Overloading Constructor [offsetY Pos]
 	Button(Rectangle r, Color defaultC, Color hoverC, Color clickedC, ButtonImage image, Texture2D texture, float labelSize, float offsetY)
 		: rect(r), defaultColor(defaultC), hoverColor(hoverC), clickedColor(clickedC),
 		texture(texture), labelSize(labelSize), offsetY(offsetY),
@@ -202,31 +208,100 @@ public:
 			else if (buttonLabel == "DEL") {
 				inputExpression.pop_back();
 			}
-			/*else if (buttonLabel == "=") {
-				inputExpression = EvaluateExpression(inputExpression);
-			}*/
-			else if (buttonLabel == "SQRT") {
+			else if (buttonLabel == "%") {
 				try {
 					float value = std::stof(inputExpression);
-					value = std::sqrt(value);
+					value /= 100.F;
 					std::string strVal = std::to_string(value);
-
-					// Check can Be int or not
-					size_t dotPos = strVal.find('.');
-					if (dotPos != std::string::npos) {
-						strVal.erase(strVal.find_last_not_of('0') + 1, std::string::npos);
-
-						if (strVal.back() == '.') {
-							strVal.pop_back();
-						}
-					}
-
+			
+					// Check can Be rounded
+					strVal = isCanBeRounded(strVal);
+			
 					inputExpression = strVal;
 				}
 				catch (std::invalid_argument) {
 					inputExpression = inputExpression;
 				}
 			}
+			else if (buttonLabel == "=") {
+				inputExpression = EvaluateExpression(inputExpression);
+			}
+			else if (buttonLabel == "SQRT") {
+				try {
+					float value = std::stof(inputExpression);
+					value = std::sqrt(value);
+					std::string strVal = std::to_string(value);
+			
+					// Check can Be rounded
+					strVal = isCanBeRounded(strVal);
+			
+					inputExpression = strVal;
+				}
+				catch (std::invalid_argument) {
+					inputExpression = inputExpression;
+				}
+			}
+			else if (inputExpression.size() > 10) {
+				inputExpression += "";
+			}
+			else if (buttonLabel == "+/-") {
+				if (inputExpression.front() == '-') {
+					inputExpression.erase(inputExpression.begin());
+				}
+				else {
+					inputExpression.insert(inputExpression.begin(), '-');
+				}
+			}
+			else if (buttonLabel == "+") {
+				if (inputExpression.back() == '+') {
+					inputExpression;
+				}
+				else {
+					inputExpression += buttonLabel;
+				}
+			}
+			else if (buttonLabel == "-") {
+				if (inputExpression.back() == '-') {
+					inputExpression;
+				}
+				else {
+					inputExpression += buttonLabel;
+				}
+			}
+			else if (buttonLabel == "x") {
+				if (inputExpression.back() == 'x') {
+					inputExpression;
+				}
+				else if (inputExpression.back() == '/') {
+					inputExpression;
+				}
+				else {
+					inputExpression += buttonLabel;
+				}
+			}
+			else if (buttonLabel == "/") {
+				if (inputExpression.back() == '/') {
+					inputExpression;
+				}
+				else if (inputExpression.back() == 'x') {
+					inputExpression;
+				}
+				else {
+					inputExpression += buttonLabel;
+				}
+			}
+			else if (buttonLabel == ".") {
+				if (inputExpression.find('.') != std::string::npos) {
+					inputExpression;
+				}
+				else {
+					inputExpression += buttonLabel;
+				}
+			}
+			else if (buttonLabel == "MC" || buttonLabel == "MR" || buttonLabel == "M-" || buttonLabel == "M+") {
+				inputExpression;
+			}
+			
 			else {
 				inputExpression += buttonLabel;
 			}
@@ -244,6 +319,20 @@ public:
 		}
 
 		return false;
+	}
+
+	std::string isCanBeRounded(std::string& strVal)
+	{
+		size_t dotPos = strVal.find('.');
+		if (dotPos != std::string::npos) {
+			strVal.erase(strVal.find_last_not_of('0') + 1, std::string::npos);
+
+			if (strVal.back() == '.') {
+				strVal.pop_back();
+			}
+		}
+
+		return strVal;
 	}
 
 	std::string GetButtonLabelFromIndex(size_t index) const {
@@ -273,13 +362,59 @@ public:
 		case BUT_PLUS:			return "+";
 		case BUT_C_AC_ON:		return "ON";
 		case BUT_0:				return "0";
-		case BUT_COMA:			return ",";
+		case BUT_COMA:			return ".";
 		case BUT_EQUAL:			return "=";
 		default:				return "";
 		}
 	}
+
+	std::string EvaluateExpression(std::string& InputExpression) {
+		std::istringstream iss(InputExpression);
+
+		char op;
+		double num1, num2;
+
+		iss >> num1;
+
+		while (iss >> op >> num2) {
+			switch (op)
+			{
+			case '+':
+				num1 += num2;
+				InputExpression = std::to_string(num1);
+				InputExpression = isCanBeRounded(InputExpression);
+				break;
+			case '-':
+				num1 -= num2;
+				InputExpression = std::to_string(num1);
+				InputExpression = isCanBeRounded(InputExpression);
+				break;
+			case 'x':
+				num1 *= num2;
+				InputExpression = std::to_string(num1);
+				InputExpression = isCanBeRounded(InputExpression);
+				break;
+			case '/':
+				if (num2 != 0) {
+					num1 /= num2;
+					InputExpression = std::to_string(num1);
+					InputExpression = isCanBeRounded(InputExpression);
+				}
+				else {
+					InputExpression = "Error";
+				}
+				break;
+
+			default:
+				break;
+			}
+		}
+
+		return InputExpression;
+	}
 };
 
+std::vector<Button> SetupButtons(const Texture2D& LabelTexture);
 
 
 struct CasioScr {
@@ -293,7 +428,6 @@ CasioScr MainScrSet{ 45, 100, 100 };
 
 Rectangle CasioBaseFrame();
 void DrawCalculator(const Font& FontMainStyle, MainScreenState& MScrState);
-std::vector<Button> SetupButtons(const Texture2D& LabelTexture);
 void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputExpression, MainScreenState& MScrState);
 void DayNight(int& time_hours, const Texture2D& DayNightTexture);
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture);
@@ -310,7 +444,7 @@ void Battery(int& time_hours);
 Rectangle MainScr();
 Rectangle MainScrBorder();
 
-std::string EvaluateExpression(std::string& InputExpression);
+//std::string EvaluateExpression(std::string& InputExpression);
 
 int main()
 {
@@ -454,7 +588,8 @@ void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputEx
 	if (MScrState == ON) {
 		const char* displayText = inputExpression.c_str();
 
-		float fontSizeDivider = 5.75F;
+		//float fontSizeDivider = 5.75F;
+		float fontSizeDivider = 4.5F;
 		float fontSize = FONT_CALCULATOR_SIZE / fontSizeDivider;
 		float space = 1.5F;
 		float rightPad = 10.F;
@@ -463,7 +598,8 @@ void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputEx
 		Vector2 TextSize = MeasureTextEx(FontCalculatorStyle, Text, fontSize, space);
 		Vector2 TextPos = {
 			(float)(MainScr().x + MainScr().width - rightPad) - TextSize.x,
-			(float)(MainScr().height / 2) + TextSize.y + 7
+			//(float)(MainScr().height / 2) + TextSize.y + 7
+			(float)(MainScr().height / 2) + TextSize.y - 7*4
 		};
 
 		DrawTextEx(FontCalculatorStyle, Text, TextPos, fontSize, space, BLACK);
@@ -474,38 +610,7 @@ void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputEx
 	}
 }
 
-std::string EvaluateExpression(std::string& InputExpression) {
-	std::istringstream iss(InputExpression);
 
-	char op;
-	double num1, num2;
-
-	iss >> num1;
-
-	while (iss >> op >> num2) {
-		switch (op)
-		{
-		case '+':
-			num1 += num2;
-		case '-':
-			num1 -= num2;
-		case 'x':
-			num1 *= num2;
-		case '/':
-			if (num2 != 0) {
-				num1 /= num2;
-			}
-			else {
-				InputExpression = "Error: Division by zero!";
-			}
-			break;
-
-		default:
-			break;
-		}
-	}
-	return InputExpression;
-}
 
 void DrawCalculator(const Font& FontMainStyle, MainScreenState& MScrState)
 {
