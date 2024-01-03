@@ -235,7 +235,7 @@ public:
 			case BUT_PERCENT:
 				try {
 					float value = std::stof(inputExpression);
-					value /= 100.F;
+					value /= 100;
 					std::string strVal = std::to_string(value);
 
 					// Check can Be rounded
@@ -489,9 +489,8 @@ int main()
 			button.OnClick(inputExpression, lastOperatorState, MainScreenColor, MScrState);
 		}
 
-
 		// FPS
-		DrawFPS(40, 25);
+		//DrawFPS(40, 25);
 
 		// Draw Second Screen Display
 		DrawSecondScreenDisplay(FontTimeStyle, DayNightTexture);
@@ -596,7 +595,7 @@ void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputEx
 		Vector2 TextPos = {
 			(float)(MainScr().x + MainScr().width - rightPad) - TextSize.x,
 			//(float)(MainScr().height / 2) + TextSize.y + 7
-			(float)(MainScr().height / 2) + TextSize.y - 7*4
+			(float)(MainScr().height / 2) + TextSize.y - (7 * 4.25F)
 		};
 
 		DrawTextEx(FontCalculatorStyle, Text, TextPos, fontSize, space, BLACK);
