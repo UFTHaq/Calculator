@@ -1,4 +1,4 @@
-// Calculator.cpp : This file contains the 'main' function. Program execution begins and ends there.
+﻿// Calculator.cpp : This file contains the 'main' function. Program execution begins and ends there.
 // Author : UFTHaq
 // Created: 24-12-2023
 // Purpose: Simple calculator application using Raylib.
@@ -6,6 +6,7 @@
 #pragma execution_character_set("utf-8")
 
 #include <iostream>
+#include <string>
 #include <raylib.h>
 #include <vector>
 #include <map>
@@ -40,16 +41,20 @@
 #define ICON {"Icons/calculator.png"}
 #define TITLE {"CALCULATOR"}
 #define DAY_NIGHT {"Icons/DayNight.png"}
-#define LABEL {"Icons/Label.png"}
+#define LABEL {"Icons/LABEL3.png"}
 
 #define CALC_WIDTH 490
 #define CALC_HEIGHT 690
+
+#define SECOND_SCR_CLR CLITERAL(Color) { 70, 60, 45, 255 }
+
 #define MAIN_SCR_ON CLITERAL(Color)  { 180, 200, 140, 0xFF }
 #define MAIN_SCR_OFF CLITERAL(Color) { 100, 100, 100, 0xFF }
 #define MAIN_SCR_BRD CLITERAL(Color) {  20,  20,  20,  100 }
+#define MAIN_SCR_BRD_CLR CLITERAL(Color) { 45, 45, 45, 200 }
 
-#define CAL_BLK CLITERAL(Color)		 {   5,   5,   5, 255 }
-#define CAL_GRA CLITERAL(Color)		 { 120, 110, 100, 255 }
+#define CAL_BLK CLITERAL(Color)		 {  20,  20,  20, 255 }
+#define CAL_GRA CLITERAL(Color)		 { 110, 100,  90, 255 }
 #define CAL_ORA CLITERAL(Color)		 { 170,  50,   5, 255 }
 Color CAL_COL_FONT = LIGHTGRAY;
 Color ColorHover = SKYBLUE;
@@ -149,7 +154,6 @@ public:
 		icon_index = static_cast<size_t>(image);
 	}
 
-
 	void Draw() {
 		Color buttonColor{};
 		Color labelColor{};
@@ -182,6 +186,21 @@ public:
 			labelSize
 		};
 
+		float listLightSIDE = 0.6F;
+		float listLightUPDOWN = 0.5F;
+		float scale = 1.75F;
+		Rectangle listLight = {
+			rect.x - listLightSIDE, rect.y + (listLightUPDOWN / scale), rect.width, rect.height - (listLightUPDOWN * scale)
+		};
+
+		float listShadowUP = 2.F;
+		float listShadowDOWN = 6.F;
+		Rectangle listShadow = {
+			rect.x - listShadowUP, rect.y - listShadowUP, rect.width + listShadowDOWN, rect.height + (listShadowDOWN / 1.25F)
+		};
+
+		DrawRectangleRounded(listShadow, roundness, segments, BLACK);
+		DrawRectangleRounded(listLight, roundness, segments, WHITE);
 		DrawRectangleRounded(rect, roundness, segments, buttonColor);
 		DrawTexturePro(texture, source, dest, Vector2{ 0 }, 0, labelColor);
 	}
@@ -195,113 +214,196 @@ public:
 			state = CLICKED;
 
 			std::string buttonLabel = GetButtonLabelFromIndex(icon_index);
+			size_t BUTTON = static_cast<ButtonImage>(icon_index);
+			size_t sizeInput = inputExpression.size();
 
-			switch (static_cast<ButtonImage>(icon_index))
-			{
-			case BUT_C_AC_ON:
-				if (MScrState == ON) {
-					inputExpression.clear();
-				}
+			if (MScrState == OFF && BUTTON == BUT_C_AC_ON) {
 				MScrState = ON;
-				break;
-			case BUT_OFF:
-				MScrState = OFF;
-				break;
-			case BUT_DEL:
-				inputExpression.pop_back();
-				break;
-			case BUT_MULTIPLY:
-				if (inputExpression.back() == 'x') {
-					inputExpression;
-				}
-				else if (inputExpression.back() == '/') {
-					inputExpression;
-				}
-				else {
-					inputExpression += buttonLabel;
-				}
-				break;
-			case BUT_DIVIDE:
-				if (inputExpression.back() == '/') {
-					inputExpression;
-				}
-				else if (inputExpression.back() == 'x') {
-					inputExpression;
-				}
-				else {
-					inputExpression += buttonLabel;
-				}
-				break;
-			case BUT_PERCENT:
-				try {
-					float value = std::stof(inputExpression);
-					value /= 100;
-					std::string strVal = std::to_string(value);
-
-					// Check can Be rounded
-					strVal = isCanBeRounded(strVal);
-
-					inputExpression = strVal;
-				}
-				catch (std::invalid_argument) {
-					inputExpression = inputExpression;
-				}
-				break;
-			case BUT_SQRT:
-				try {
-					float value = std::stof(inputExpression);
-					value = std::sqrt(value);
-					std::string strVal = std::to_string(value);
-
-					// Check can Be rounded
-					strVal = isCanBeRounded(strVal);
-
-					inputExpression = strVal;
-				}
-				catch (std::invalid_argument) {
-					inputExpression = inputExpression;
-				}
-				break;
-			case BUT_PLUSMINUS:
-				if (inputExpression.front() == '-') {
-					inputExpression.erase(inputExpression.begin());
-				}
-				else {
-					inputExpression.insert(inputExpression.begin(), '-');
-				}
-				break;
-			case BUT_EQUAL:
-				inputExpression = EvaluateExpression(inputExpression);
-				break;
-			case BUT_MC:
-			case BUT_MR:
-			case BUT_MMIN:
-			case BUT_MPLUS:
-				break;
-			case BUT_PLUS:
-			case BUT_MINUS:
-			case BUT_0:
-			case BUT_1:
-			case BUT_2:
-			case BUT_3:
-			case BUT_4:
-			case BUT_5:
-			case BUT_6:
-			case BUT_7:
-			case BUT_8:
-			case BUT_9:
-			case BUT_COMA:
-				if (inputExpression.size() > 10) {
-					inputExpression += "";
-				}
-				else {
-					inputExpression += buttonLabel;
-				}
-				break;
-			
-			default:
-				break;
 			}
+			
+			else {
+				switch (BUTTON)
+				{
+				case BUT_C_AC_ON:
+					if (MScrState == ON) {
+						inputExpression.clear();
+					}
+					MScrState = ON;
+					break;
+
+				case BUT_OFF:
+					MScrState = OFF;
+					break;
+
+				case BUT_DEL:
+					if (sizeInput == 0) {
+						inputExpression;
+					}
+					else {
+						inputExpression.pop_back();
+					}
+					break;
+
+				case BUT_MULTIPLY:
+					if (sizeInput == 0) {
+						inputExpression;
+					}
+					else if (inputExpression.back() == 'x') {
+						inputExpression;
+					}
+					else if (inputExpression.back() == '/') {
+						inputExpression;
+					}
+					else {
+						inputExpression += buttonLabel;
+					}
+					break;
+
+				case BUT_DIVIDE:
+					if (sizeInput == 0) {
+						inputExpression;
+					}
+					else if (inputExpression.back() == '/') {
+						inputExpression;
+					}
+					else if (inputExpression.back() == 'x') {
+						inputExpression;
+					}
+					else {
+						inputExpression += buttonLabel;
+					}
+					break;
+
+				case BUT_PERCENT:
+					try {
+						float value = std::stof(inputExpression);
+						value /= 100;
+						std::string strVal = std::to_string(value);
+
+						// Check can Be rounded
+						strVal = isCanBeRounded(strVal);
+
+						inputExpression = strVal;
+					}
+					catch (std::invalid_argument) {
+						inputExpression = inputExpression;
+					}
+					break;
+
+				case BUT_SQRT:
+					try {
+						float value = std::stof(inputExpression);
+						value = std::sqrt(value);
+						std::string strVal = std::to_string(value);
+
+						// Check can Be rounded
+						strVal = isCanBeRounded(strVal);
+
+						inputExpression = strVal;
+					}
+					catch (std::invalid_argument) {
+						inputExpression = inputExpression;
+					}
+					break;
+
+				case BUT_PLUSMINUS:
+					if (sizeInput == 0) {
+						inputExpression;
+					}
+					else if (inputExpression.front() == '-') {
+						inputExpression.erase(inputExpression.begin());
+					}
+					else {
+						inputExpression.insert(inputExpression.begin(), '-');
+					}
+					break;
+
+				case BUT_EQUAL:
+					inputExpression = EvaluateExpression(inputExpression);
+					break;
+
+				case BUT_MC:
+				case BUT_MR:
+				case BUT_MMIN:
+				case BUT_MPLUS:
+					break;
+
+				case BUT_COMA:
+					if (sizeInput == 0) {
+						inputExpression;
+					}
+					else if (
+						inputExpression.find('/') != std::string::npos ||
+						inputExpression.find('x') != std::string::npos ||
+						inputExpression.find('-') != std::string::npos ||
+						inputExpression.find('+') != std::string::npos
+						) {
+
+						size_t count = 0;
+						for (size_t i = 0; i < sizeInput; i++) {
+							if (inputExpression.at(i) == '.') {
+								count++;
+							}
+						}
+
+						if (count < 2) {
+							inputExpression += buttonLabel;
+						}
+
+					}
+					else if (inputExpression.find(".") != std::string::npos) {
+						inputExpression;
+					}
+					else if (inputExpression.back() == '.') {
+						inputExpression;
+					}
+					else {
+						inputExpression += buttonLabel;
+					}
+					break;
+
+				case BUT_PLUS:
+					if (sizeInput == 0) {
+						inputExpression;
+					}
+					else {
+						inputExpression += buttonLabel;
+					}
+					break;
+
+				case BUT_MINUS:
+					if (sizeInput == 0) {
+						inputExpression;
+					}
+					else {
+						inputExpression += buttonLabel;
+					}
+					break;
+
+				case BUT_0:
+				case BUT_1:
+				case BUT_2:
+				case BUT_3:
+				case BUT_4:
+				case BUT_5:
+				case BUT_6:
+				case BUT_7:
+				case BUT_8:
+				case BUT_9:
+					if (sizeInput > 10) {
+						inputExpression += "";
+					}
+					else {
+						inputExpression += buttonLabel;
+					}
+					break;
+			
+				default:
+					break;
+				}
+
+			}
+
 
 			return true;
 		}
@@ -420,7 +522,7 @@ struct CasioScr {
 	float h{};
 };
 
-CasioScr SecondScrSet{ 145, 37, 40 };
+CasioScr SecondScrSet{ 145, 37, 42.5F };
 CasioScr MainScrSet{ 45, 100, 100 };
 
 Rectangle CasioBaseFrame();
@@ -429,17 +531,22 @@ void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputEx
 void DayNight(int& time_hours, const Texture2D& DayNightTexture);
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture);
 Rectangle CasioFrontFrame();
+Rectangle CasioFrontFrameLight();
+Rectangle CasioFrontFrameShadow();
 Vector2 CasioTitlePos();
 Vector2 CasioSeriesPos();
 
-Rectangle SecondScr();
 Rectangle SecondScrBorder();
+Rectangle SecondScrBorderLight();
+Rectangle SecondScr();
 
 int LiveClock(Font& FontTimeStyle);
 void Battery(int& time_hours);
 
-Rectangle MainScr();
 Rectangle MainScrBorder();
+Rectangle MainScrShadow();
+Rectangle MainScrLight();
+Rectangle MainScr();
 
 //std::string EvaluateExpression(std::string& InputExpression);
 
@@ -611,20 +718,29 @@ void DrawMainScreenDisplay(const Font& FontCalculatorStyle, std::string& inputEx
 void DrawCalculator(const Font& FontMainStyle, MainScreenState& MScrState)
 {
 	// Base
-	DrawRectangleRounded(CasioBaseFrame(), 0.1f, 2, DARKGRAY);
+	DrawRectangleRounded(CasioBaseFrame(), 0.1F, 2, DARKGRAY);
+	// Front Light
+	DrawRectangleRounded(CasioFrontFrameLight(), 0.1F, 2, WHITE);
+	// Front Shadow
+	DrawRectangleRounded(CasioFrontFrameShadow(), 0.1F, 2, BLACK);
 	// Front
-	DrawRectangleRounded(CasioFrontFrame(), 0.1f, 2, UFTHColor);
+	DrawRectangleRounded(CasioFrontFrame(), 0.1F, 2, UFTHColor);
 	// Merk
 	DrawTextEx(FontMainStyle, "CASIO", CasioTitlePos(), (FONT_SIZE / 11), 2, LIGHTGRAY);
+	// Second Screen Border Light
+	DrawRectangleRounded(SecondScrBorderLight(), 0.15F, 10, WHITE);
 	// Second Screen Border
-	DrawRectangleRounded(SecondScrBorder(), 0.15f, 10, MAIN_SCR_BRD);
+	DrawRectangleRounded(SecondScrBorder(), 0.15F, 10, BLACK);
 	// Second Screen
-	DrawRectangleRounded(SecondScr(), 0.15f, 10, DARKBROWN);
+	DrawRectangleRounded(SecondScr(), 0.15F, 10, SECOND_SCR_CLR);
 	// Series
-	DrawTextEx(FontMainStyle, "MX-8B", CasioSeriesPos(), (FONT_SIZE / 20.f), 2, LIGHTGRAY);
+	DrawTextEx(FontMainStyle, "MX-8B", CasioSeriesPos(), (FONT_SIZE / 20.F), 2, LIGHTGRAY);
 	// Main Screen Border
-	DrawRectangleRounded(MainScrBorder(), 0.10f, 10, { 50,50,50,200 });
-	// Main Screen
+	DrawRectangleRounded(MainScrBorder(), 0.10F, 10, MAIN_SCR_BRD_CLR);
+	// Main Screen Light
+	DrawRectangleRounded(MainScrLight(), 0.10F, 10, WHITE);
+	// Main Screen Shadow
+	DrawRectangleRounded(MainScrShadow(), 0.10F, 10, BLACK);
 
 	Color MainScreenColor{};
 
@@ -640,8 +756,8 @@ void DrawCalculator(const Font& FontMainStyle, MainScreenState& MScrState)
 		break;
 	}
 
+	// Main Screen
 	DrawRectangleRounded(MainScr(), 0.1f, 10, MainScreenColor);
-	//MainScreenColor
 }
 
 void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture)
@@ -658,6 +774,8 @@ void DrawSecondScreenDisplay(Font& FontTimeStyle, Texture2D& DayNightTexture)
 
 void DayNight(int& time_hours, const Texture2D& DayNightTexture)
 {
+	Color DayNightColor = GRAY;
+
 	size_t icon_index = 0;
 	if (time_hours >= 6 && time_hours <= 18) {
 		icon_index = 0;
@@ -669,7 +787,7 @@ void DayNight(int& time_hours, const Texture2D& DayNightTexture)
 	float pad = 7.5f;
 	float icon_size = 400;
 	Rectangle dest = {
-		(float)CALC_WIDTH - SecondScrSet.pad - (pad * 3.5f),
+		(float)CALC_WIDTH - SecondScrSet.pad - (pad * 4.F),
 		(float)CasioBaseFrame().y + SecondScrSet.y + pad,
 		(float)SecondScrSet.h - (pad * 2),
 		(float)SecondScrSet.h - (pad * 2)
@@ -677,7 +795,7 @@ void DayNight(int& time_hours, const Texture2D& DayNightTexture)
 
 	Rectangle source = { icon_size * icon_index, 0, icon_size, icon_size };
 
-	DrawTexturePro(DayNightTexture, source, dest, Vector2{ 0 }, 0, GRAY);
+	DrawTexturePro(DayNightTexture, source, dest, Vector2{ 0 }, 0, DayNightColor);
 }
 
 
@@ -685,7 +803,10 @@ Rectangle CasioBaseFrame()
 {
 	float pad = 5;
 	Rectangle CasioBase{
-		pad, pad, WINDOW_WIDTH - (pad * 2), WINDOW_HEIGHT - (pad * 2)
+		pad, 
+		pad, 
+		WINDOW_WIDTH - (pad * 2),
+		WINDOW_HEIGHT - (pad * 2)
 	};
 
 	return CasioBase;
@@ -693,17 +814,49 @@ Rectangle CasioBaseFrame()
 
 Rectangle CasioFrontFrame()
 {
-	float pad = 12.5f;
+	float pad = 12.5F;
 	Rectangle CasioFrontFrame{
-		pad, pad, WINDOW_WIDTH - (pad * 2), WINDOW_HEIGHT - (pad * 2)
+		pad, 
+		pad, 
+		WINDOW_WIDTH - (pad * 2), 
+		WINDOW_HEIGHT - (pad * 2)
+	};
+	return CasioFrontFrame;
+}
+
+Rectangle CasioFrontFrameLight()
+{
+	float pad = 12.5F;
+	float sideLightPad = 1.F;
+	float topLightPad = 2.F;
+	Rectangle CasioFrontFrame{
+		pad - sideLightPad, 
+		pad + (topLightPad/5.F),
+		WINDOW_WIDTH - (pad * 2), 
+		WINDOW_HEIGHT - (pad * 2) - topLightPad
+	};
+	return CasioFrontFrame;
+}
+
+Rectangle CasioFrontFrameShadow() 
+{
+	float pad = 12.5F;
+	float sideShadowPad = 3.5F;
+	float topShadowPad = 0.35F;
+	Rectangle CasioFrontFrame{
+		pad + sideShadowPad,
+		pad + (topShadowPad / 5.F),
+		WINDOW_WIDTH - (pad * 2),
+		WINDOW_HEIGHT - (pad * 2) + topShadowPad
 	};
 	return CasioFrontFrame;
 }
 
 Vector2 CasioTitlePos()
 {
+	float UPDOWN = 44.F;
 	Vector2 CasioTitlePos{
-		CasioBaseFrame().x + 35, CasioBaseFrame().y + 42.5f
+		CasioBaseFrame().x + 35, CasioBaseFrame().y + UPDOWN
 	};
 
 	return CasioTitlePos;
@@ -711,8 +864,9 @@ Vector2 CasioTitlePos()
 
 Vector2 CasioSeriesPos()
 {
+	float UPDOWN = 50.F;
 	Vector2 CasioSeriesPos{
-		CasioBaseFrame().x + 35 + 350, CasioBaseFrame().y + 48.5f
+		CasioBaseFrame().x + 35 + 350, CasioBaseFrame().y + UPDOWN
 	};
 	return CasioSeriesPos;
 }
@@ -730,23 +884,40 @@ Rectangle SecondScr()
 
 Rectangle SecondScrBorder()
 {
-	float s_pad = 3;  // sidepad
-	float h_pad = 2;  // top-bottom pad
-
+	float s_pad = 1.65F;  // sidepad
+	float h_pad = 1.55F;  // top-bottom pad
+	float lightPadSide = 0.1F;
 	Rectangle SecondScrBorder{
 		(float)CasioBaseFrame().x + SecondScrSet.pad - s_pad,
 		(float)CasioBaseFrame().y + SecondScrSet.y - h_pad,
-		(float)CALC_WIDTH - ((SecondScrSet.pad - s_pad) * 2),
+		(float)CALC_WIDTH - ((SecondScrSet.pad - s_pad - lightPadSide) * 2),
 		(float)SecondScrSet.h + (h_pad * 2)
+	};
+	return SecondScrBorder;
+}
+
+Rectangle SecondScrBorderLight()
+{
+	float s_pad = 1.45F;  // sidepad
+	float h_pad = 1.25F;  // top-bottom pad
+	float lightPadSide = 0.45F;
+	float lightPadUPDOWN = 0.65F;
+	Rectangle SecondScrBorder{
+		(float)CasioBaseFrame().x + SecondScrSet.pad - s_pad,
+		(float)CasioBaseFrame().y + (SecondScrSet.y - h_pad) + (lightPadUPDOWN / 0.45F),
+		(float)CALC_WIDTH - ((SecondScrSet.pad - s_pad - lightPadSide) * 2),
+		(float)SecondScrSet.h + (h_pad * 2) - lightPadUPDOWN * 1.80F
 	};
 	return SecondScrBorder;
 }
 
 void Battery(int& time_hours)
 {
+	Color BatteryColor = GRAY;
+
 	// Draw The Battery Frame
-	float left_pad = 10;
-	float h_pad = 13.f;
+	float left_pad = 10.F;
+	float h_pad = 14.F;
 	float batteryLength = 30;
 	Rectangle BatteryFrame{
 		(float)CasioBaseFrame().x + SecondScrSet.pad + left_pad,
@@ -754,55 +925,68 @@ void Battery(int& time_hours)
 		(float)batteryLength,
 		(float)SecondScrSet.h - (h_pad * 2)
 	};
-	DrawRectangleRoundedLines(BatteryFrame, 0.1f, 10, 2, GRAY);
+	DrawRectangleRoundedLines(BatteryFrame, 0.1f, 10, 2, BatteryColor);
 
 	// Draw The Battery Anode
-	float y_pos_anode = 16;
+	float y_pos_anode = 17.F;
 	Rectangle Anode{
 		(float)CasioBaseFrame().x + SecondScrSet.pad + left_pad + batteryLength,
 		(float)CasioBaseFrame().y + SecondScrSet.y + y_pos_anode,
 		(float)5,
 		(float)SecondScrSet.h - (y_pos_anode * 2)
 	};
-	DrawRectangleRounded(Anode, 0.5f, 10, GRAY);
+	DrawRectangleRounded(Anode, 0.5f, 10, BatteryColor);
 
 	// Draw the cell
-	Color cell_color = GRAY;
-	int battery_cell = 0;
+	Color cellColor = BatteryColor;
+	float alpha = 1.F;
+
+	int cellBattery = 0;
 	if (time_hours >= 1 && time_hours < 10) {
-		battery_cell = 4;
+		cellBattery = 4;
 	}
 	else if (time_hours >= 10 && time_hours < 13) {
-		battery_cell = 3;
+		cellBattery = 3;
 	}
 	else if (time_hours >= 13 && time_hours < 17) {
-		battery_cell = 2;
+		cellBattery = 2;
 	}
 	else if (time_hours >= 17 && time_hours < 20) {
-		battery_cell = 1;
+		cellBattery = 1;
 	}
 	else {
-		cell_color = RED;
-		battery_cell = 1;
-		// buat kedip kedip
+		cellBattery = 1;
+		cellColor = {200, 70, 70};
+		// BLINKING
+		double currentTime = GetTime();
+		double speedDivider = 1.75;
+		double sineValue = sin(currentTime * 2.0 * PI / speedDivider);  // Adjust frequency as needed
+		alpha = static_cast<float>((sineValue + 1.0) / 2.0);
 	}
 
-	float cell_width = batteryLength / 5.4f;
-	float y_cell_pad = 14.5f;
-	float side_pad = 1.5f;
-	for (int i = 0; i < battery_cell; i++) {
+	float cellWidth = batteryLength / 5.5F;
+	float yCellPad = 15.85F;
+	float sidePad = 1.585F;
+	for (int i = 0; i < cellBattery; i++) {
 		Rectangle Cell{
-			(float)CasioBaseFrame().x + SecondScrSet.pad + left_pad + (i * cell_width) + (i * side_pad) + side_pad,
-			(float)CasioBaseFrame().y + SecondScrSet.y + y_cell_pad,
-			(float)cell_width,
-			(float)SecondScrSet.h - (y_cell_pad * 2)
+			(float)CasioBaseFrame().x + SecondScrSet.pad + left_pad + (i * cellWidth) + (i * sidePad) + sidePad,
+			(float)CasioBaseFrame().y + SecondScrSet.y + yCellPad,
+			(float)cellWidth,
+			(float)SecondScrSet.h - (yCellPad * 2)
 		};
-		DrawRectangleRounded(Cell, 0.5f, 10, cell_color);
+		DrawRectangleRounded(
+			Cell, 
+			0.5f, 
+			10, 
+			Fade(cellColor, alpha)
+		);
 	}
 }
 
 int LiveClock(Font& FontTimeStyle)
 {
+	Color ClockColor = GRAY;
+
 	time_t currentTime = time(nullptr);
 
 	if (currentTime == -1) {
@@ -819,20 +1003,20 @@ int LiveClock(Font& FontTimeStyle)
 
 	int time_hours = timeInfo.tm_hour;
 
-	float font_size = FONT_TIME_SIZE / 4.5f;
+	float font_size = FONT_TIME_SIZE / 4.25F;
 	char timeString[9];
 	strftime(timeString, sizeof(timeString), "%H:%M:%S", &timeInfo);
 
 	Vector2 TimePos = MeasureTextEx(FontTimeStyle, TextFormat("%s", timeString), font_size, 0);
 
-	Vector2 TimePosDraw{ (float)CALC_WIDTH / 2 - (TimePos.x / 2) + 2.5f, (float)(SecondScrSet.h / 2) + (float)(TimePos.y / 0.675f) };
+	Vector2 TimePosDraw{ (float)CALC_WIDTH / 2 - (TimePos.x / 2) + 2.5f, (float)(SecondScrSet.h / 2) + (float)(TimePos.y / 0.725F) };
 	DrawTextEx(
 		FontTimeStyle,
 		TextFormat("%s", timeString),
 		TimePosDraw,
 		font_size,
 		2.5f,
-		GRAY
+		ClockColor
 	);
 
 	return time_hours;
@@ -851,10 +1035,40 @@ Rectangle MainScr()
 	return MainScr;
 }
 
+Rectangle MainScrLight()
+{
+	float sidePad = 0.50F;
+	float upDownPad = 0.35F;
+
+	Rectangle MainScrLight{
+		(float)CasioBaseFrame().x + MainScrSet.pad + sidePad,
+		(float)CasioBaseFrame().y + MainScrSet.y + (upDownPad * 5.25F),
+		(float)CALC_WIDTH - ((MainScrSet.pad - sidePad) * 2) + sidePad * 2,
+		(float)MainScrSet.h - (upDownPad * 2)
+	};
+
+	return MainScrLight;
+}
+
+Rectangle MainScrShadow()
+{
+	float sidePad = 1.6F;
+	float upDownPad = 0.75F;
+
+	Rectangle MainScrShadow{
+		(float)CasioBaseFrame().x + MainScrSet.pad - sidePad,
+		(float)CasioBaseFrame().y + MainScrSet.y - upDownPad,
+		(float)CALC_WIDTH - ((MainScrSet.pad - sidePad) * 2),
+		(float)MainScrSet.h + (upDownPad * 2.5F)
+	};
+	return MainScrShadow;
+
+}
+
 Rectangle MainScrBorder() 
 {
-	int s_pad = 8; // sidepad
-	int h_pad = 6;  // top-bottom pad
+	float s_pad = 10.F; // sidepad
+	float h_pad = 7.F;  // top-bottom pad
 
 	Rectangle MainScrBorder{
 		(float)CasioBaseFrame().x + MainScrSet.pad - s_pad,
@@ -865,6 +1079,7 @@ Rectangle MainScrBorder()
 
 	return MainScrBorder;
 }
+
 
 
 
