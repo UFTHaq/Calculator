@@ -26,9 +26,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#1f1f1f"
      inkscape:document-units="px"
-     inkscape:zoom="0.35355339"
-     inkscape:cx="401.63665"
-     inkscape:cy="352.13918"
+     inkscape:zoom="0.125"
+     inkscape:cx="8384"
+     inkscape:cy="1180"
      inkscape:window-width="1920"
      inkscape:window-height="1046"
      inkscape:window-x="-11"
@@ -385,26 +385,6 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(-70.12626,-36.872379)">
-    <path
-       id="rect1"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 170.66793,36.872379 V 137.41405 H 271.2096 V 36.872379 Z m 2.51353,2.513542 h 95.51461 v 95.514599 h -95.51461 z" />
-    <path
-       id="rect1-1"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 472.29292,36.872379 V 137.41406 H 572.83459 V 36.872379 Z m 2.51355,2.513548 h 95.51459 v 95.514593 h -95.51459 z" />
-    <path
-       id="rect1-2"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 271.2096,36.872379 V 137.41405 H 371.75125 V 36.872379 Z m 2.51355,2.513542 h 95.51457 v 95.514599 h -95.51457 z" />
-    <path
-       id="rect1-9"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 371.75125,36.872379 V 137.41406 H 472.29292 V 36.872379 Z m 2.51353,2.513542 h 95.51461 v 95.514599 h -95.51461 z" />
-    <path
-       id="rect1-93"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 70.12626,36.872379 V 137.41405 H 170.66793 V 36.872379 Z m 2.513529,2.513542 H 168.1544 V 134.90052 H 72.639789 Z" />
     <text
        xml:space="preserve"
        style="font-size:3.175px;fill:#808080;stroke-width:40;paint-order:markers fill stroke"
@@ -426,7 +406,7 @@
          id="tspan3"
          style="stroke-width:40"
          x="141.5941"
-         y="52.386585"></tspan></text>
+         y="52.386585" /></text>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:51.6196px;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;stroke-width:650.324;paint-order:markers fill stroke"
@@ -463,26 +443,6 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Arial;-inkscape-font-specification:Arial;stroke-width:601.977"
          x="187.52927"
          y="98.917725">OFF</tspan></text>
-    <path
-       id="rect1-4"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 673.37626,36.872379 V 137.41405 H 773.91793 V 36.872379 Z m 2.51353,2.513538 h 95.51461 v 95.514603 h -95.51461 z" />
-    <path
-       id="rect1-1-7"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 975.00123,36.872379 V 137.41406 H 1075.5429 V 36.872379 Z m 2.51351,2.513548 h 95.51466 v 95.514593 h -95.51466 z" />
-    <path
-       id="rect1-2-0"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 773.91793,36.872379 V 137.41405 H 874.45958 V 36.872379 Z m 2.51355,2.513538 h 95.51457 v 95.514603 h -95.51457 z" />
-    <path
-       id="rect1-9-3"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 874.45958,36.872379 V 137.41406 H 975.00123 V 36.872379 Z m 2.51353,2.513538 h 95.51461 v 95.514603 h -95.51461 z" />
-    <path
-       id="rect1-93-3"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 572.83459,36.872379 V 137.41405 H 673.37626 V 36.872379 Z m 2.51353,2.513538 h 95.51461 v 95.514603 h -95.51461 z" />
     <path
        id="rect2-3"
        style="fill:#ffffff;stroke-width:81.023;paint-order:markers fill stroke"
@@ -523,26 +483,6 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Century Gothic';-inkscape-font-specification:'Century Gothic';stroke-width:1061.49"
          x="1089.4611"
          y="118.40651">9</tspan></text>
-    <path
-       id="rect1-6"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1176.0845,36.872379 V 137.41405 h 100.5417 V 36.872379 Z m 2.5136,2.513538 h 95.5145 v 95.514603 h -95.5145 z" />
-    <path
-       id="rect1-1-75"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1477.7095,36.872379 V 137.41406 h 100.5417 V 36.872379 Z m 2.5136,2.513548 h 95.5145 v 95.514593 h -95.5145 z" />
-    <path
-       id="rect1-2-4"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1276.6262,36.872379 V 137.41405 h 100.5417 V 36.872379 Z m 2.5135,2.513538 h 95.5147 v 95.514603 h -95.5147 z" />
-    <path
-       id="rect1-9-5"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1377.1679,36.872379 V 137.41406 h 100.5416 V 36.872379 Z m 2.5135,2.513538 h 95.5146 v 95.514603 h -95.5146 z" />
-    <path
-       id="rect1-93-34"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1075.5429,36.872379 V 137.41405 h 100.5416 V 36.872379 Z m 2.5135,2.513538 h 95.5146 v 95.514603 h -95.5146 z" />
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:65.9786px;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;stroke-width:831.227;paint-order:markers fill stroke"
@@ -567,78 +507,38 @@
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Cambria;-inkscape-font-specification:Cambria;stroke-width:1376.21"
          x="680.98529"
          y="119.84106">÷</tspan></text>
-    <path
-       id="rect1-7"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1678.7929,36.872379 V 137.41405 h 100.5416 V 36.872379 Z m 2.5135,2.513538 h 95.5146 v 95.514603 h -95.5146 z" />
-    <path
-       id="rect1-1-72"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1980.4178,36.872379 V 137.41406 h 100.5417 V 36.872379 Z m 2.5135,2.513548 h 95.5147 v 95.514593 h -95.5147 z" />
-    <path
-       id="rect1-2-9"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1779.3345,36.872379 V 137.41405 h 100.5418 V 36.872379 Z m 2.5136,2.513538 h 95.5145 v 95.514603 h -95.5145 z" />
-    <path
-       id="rect1-9-9"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1879.8763,36.872379 V 137.41406 h 100.5415 V 36.872379 Z m 2.5135,2.513538 h 95.5145 v 95.514603 h -95.5145 z" />
-    <path
-       id="rect1-93-7"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 1578.2512,36.872379 V 137.41405 h 100.5417 V 36.872379 Z m 2.5135,2.513538 h 95.5147 v 95.514603 h -95.5147 z" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:68.8659px;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;stroke-width:867.603;paint-order:markers fill stroke"
-       x="1786.1587"
-       y="97.754425"
-       id="text6-83"
-       transform="scale(1.0038755,0.99613945)"><tspan
-         sodipodi:role="line"
-         id="tspan6-9"
-         style="stroke-width:867.603"
+    <g
+       id="g1"
+       transform="matrix(0.95141394,0,0,0.95141394,88.893406,3.0718367)">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:68.8659px;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;stroke-width:867.603;paint-order:markers fill stroke"
          x="1786.1587"
-         y="97.754425">+</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:87.2408px;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;stroke-width:1099.09;paint-order:markers fill stroke"
-       x="1316.2241"
-       y="170.81168"
-       id="text7-7"
-       transform="scale(1.3871229,0.72091666)"><tspan
-         sodipodi:role="line"
-         id="tspan7-7"
-         style="stroke-width:1099.09"
+         y="97.754425"
+         id="text6-83"
+         transform="scale(1.0038755,0.99613945)"><tspan
+           sodipodi:role="line"
+           id="tspan6-9"
+           style="stroke-width:867.603"
+           x="1786.1587"
+           y="97.754425">+</tspan></text>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:87.2408px;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;stroke-width:1099.09;paint-order:markers fill stroke"
          x="1316.2241"
-         y="170.81168">-</tspan></text>
-    <path
-       id="rect7-0"
-       style="fill:#ffffff;stroke-width:137.322;paint-order:markers fill stroke"
-       d="m 1849.9049,56.980747 -46.4606,62.591473 0.1011,0.0604 5.7618,0.11599 46.5041,-62.650784 z" />
-    <path
-       id="rect1-70"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 2181.5011,36.872379 V 137.41405 h 100.5417 V 36.872379 Z m 2.5135,2.513538 h 95.5147 v 95.514603 h -95.5147 z" />
-    <path
-       id="rect1-1-0"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 2483.1261,36.872379 V 137.41406 h 100.5417 V 36.872379 Z m 2.5135,2.513548 h 95.5147 v 95.514593 h -95.5147 z" />
-    <path
-       id="rect1-1-0-0"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 2583.6678,36.872379 V 137.41406 h 100.5417 V 36.872379 Z m 2.5135,2.513548 h 95.5147 v 95.514593 h -95.5147 z" />
-    <path
-       id="rect1-2-7"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 2282.0428,36.872379 V 137.41405 h 100.5415 V 36.872379 Z m 2.5135,2.513538 h 95.5145 v 95.514603 h -95.5145 z" />
-    <path
-       id="rect1-9-1"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 2382.5843,36.872379 V 137.41406 h 100.5418 V 36.872379 Z m 2.5137,2.513538 h 95.5146 v 95.514603 h -95.5146 z" />
-    <path
-       id="rect1-93-2"
-       style="fill:#808080;stroke-width:72.1308;paint-order:markers fill stroke"
-       d="M 2080.9595,36.872379 V 137.41405 h 100.5416 V 36.872379 Z m 2.5136,2.513538 h 95.5145 v 95.514603 h -95.5145 z" />
+         y="170.81168"
+         id="text7-7"
+         transform="scale(1.3871229,0.72091666)"><tspan
+           sodipodi:role="line"
+           id="tspan7-7"
+           style="stroke-width:1099.09"
+           x="1316.2241"
+           y="170.81168">-</tspan></text>
+      <path
+         id="rect7-0"
+         style="fill:#ffffff;stroke-width:137.322;paint-order:markers fill stroke"
+         d="m 1849.9049,56.980747 -46.4606,62.591473 0.1011,0.0604 5.7618,0.11599 46.5041,-62.650784 z" />
+    </g>
     <text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:89.657px;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;stroke-width:1129.53;paint-order:markers fill stroke"
@@ -844,7 +744,7 @@
        r="7.5406251" />
     <g
        id="g12"
-       transform="matrix(1.0133309,0,0,1.0032222,-148.52423,-166.67988)">
+       transform="matrix(1.1999971,0,0,1.0951353,-605.52064,-189.93462)">
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40.0465px;font-family:Arial;-inkscape-font-specification:Arial;fill:#ffffff;stroke-width:504.523;paint-order:markers fill stroke"
